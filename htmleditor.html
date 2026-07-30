@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>htmlでプログラミング!!</title>
+<style>
+:root{--bg:#eef2f6;--panel:#fff;--line:#cbd5e1;--ink:#172033;--muted:#657286;--head:#263238;--blue:#1565c0;--green:#2e7d32;--red:#b3261e}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+header{min-height:72px;padding:10px 15px;background:var(--head);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{margin:0;font-size:21px}header p{margin:4px 0 0;font-size:13px;opacity:.9}.top{display:flex;gap:8px;flex-wrap:wrap}
+main{height:calc(100vh - 72px);display:grid;grid-template-columns:minmax(360px,1fr) minmax(320px,1fr);gap:10px;padding:10px}
+.panel{min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 2px 10px #0001}
+.ph{min-height:43px;padding:8px 10px;background:#f8fafc;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}.title{font-weight:700;font-size:14px}.status{font-size:12px;color:var(--muted)}
+.editor{flex:1;min-height:0;display:grid;grid-template-columns:auto 1fr;background:#fbfdff}.nums{margin:0;padding:12px 8px;min-width:44px;overflow:hidden;text-align:right;background:#edf2f7;color:#7a8796;border-right:1px solid var(--line);font:14px/1.5 ui-monospace,Consolas,monospace;user-select:none}
+textarea{width:100%;height:100%;min-height:0;padding:12px;border:0;outline:0;resize:none;background:#fbfdff;color:#142033;font:14px/1.5 ui-monospace,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+.controls{padding:8px;display:flex;gap:7px;flex-wrap:wrap;border-top:1px solid var(--line);background:#f8fafc}
+button,.file{border:1px solid transparent;border-radius:7px;padding:8px 12px;font-size:14px;font-weight:600;cursor:pointer;line-height:1.2}.primary{background:var(--blue);color:#fff}.success{background:var(--green);color:#fff}.neutral,.file{background:#e8eef4;color:var(--ink);border-color:#cbd5e1}.danger{background:#fff0ef;color:var(--red);border-color:#efb8b3}.small{padding:6px 9px;font-size:12px}#fileInput{display:none}
+.hint{padding:7px 10px;border-top:1px solid var(--line);background:#fffdf4;color:#5f532b;font-size:12px}.preview{flex:1;min-height:0}iframe{width:100%;height:100%;border:0;background:#fff}
+.console{max-height:125px;overflow:auto;border-top:1px solid var(--line);background:#111827;color:#d7e0eb;font:12px/1.45 ui-monospace,Consolas,monospace}.ch{display:flex;justify-content:space-between;align-items:center;padding:5px 9px;background:#1f2937;color:#fff}.ct{margin:0;padding:7px 9px;min-height:30px;white-space:pre-wrap;word-break:break-word}.hidden{display:none!important}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);padding:9px 14px;border-radius:8px;background:#172033;color:#fff;font-size:13px;box-shadow:0 4px 18px #0005;opacity:0;pointer-events:none;transition:.2s;z-index:10}.toast.show{opacity:1}
+@media(max-width:760px){body{overflow:auto}header{align-items:flex-start;flex-direction:column}main{height:auto;grid-template-columns:1fr;grid-template-rows:minmax(520px,62vh) minmax(480px,58vh)}}
+</style>
+</head>
+<body>
+<header><div><h1>htmlでプログラミング!!</h1><p>左にHTMLを入力・貼り付け → 実行 → 右で確認。入力内容はこの端末内に自動保存されます。</p></div><div class="top"><button id="runTop" class="primary">? 実行</button><button id="newTab" class="neutral">別タブで確認</button></div></header>
+<main>
+<section class="panel">
+<div class="ph"><span class="title">HTML・CSS・JavaScript 編集窓</span><span id="saveStatus" class="status">準備完了</span></div>
+<div class="editor"><pre id="nums" class="nums">1</pre><textarea id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="HTMLコード編集欄"></textarea></div>
+<div class="controls">
+<button id="run" class="primary">? 実行</button>
+<button id="clean" class="neutral">``` を除いて実行</button>
+<button id="copy" class="neutral">コードをコピー</button>
+<label class="file" for="fileInput">HTMLを読み込む</label><input id="fileInput" type="file" accept=".html,.htm,text/html">
+<button id="download" class="success">HTMLを保存</button>
+<button id="reset" class="neutral">初期教材に戻す</button>
+<button id="clear" class="danger">全部消す</button>
+</div>
+<div class="hint">ChatGPTの回答からHTML全体をコピーして貼り付けます。先頭と末尾に <b>```html</b> と <b>```</b> が付いていても「``` を除いて実行」で取り除けます。Ctrl＋Enterでも実行できます。</div>
+</section>
+<section class="panel">
+<div class="ph"><span class="title">実行結果</span><span id="runStatus" class="status">未実行</span></div>
+<div class="preview"><iframe id="preview" title="実行結果" sandbox="allow-scripts allow-forms allow-modals allow-pointer-lock allow-popups allow-downloads"></iframe></div>
+<div id="consolePanel" class="console hidden"><div class="ch"><span>エラー・console.log</span><button id="clearConsole" class="small neutral">消去</button></div><pre id="consoleText" class="ct"></pre></div>
+</section>
+</main>
+<div id="toast" class="toast"></div>
+<script>
+const KEY="html-classroom-editor-v2";
+const starter=`<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>さいころ</title>
+<style>
+body{font-family:sans-serif;text-align:center;margin-top:60px}
+button{font-size:20px;padding:10px 20px}
+#result{font-size:48px;margin-top:30px;color:crimson}
+</style>
+</head>
+<body>
+<h1>さいころ</h1>
+<!-- ボタンを押すと drawDice() を実行 -->
+<button onclick="drawDice()">さいころをふる</button>
+<!-- 結果を表示する場所 -->
+<div id="result">？</div>
+<script>
+function drawDice(){
+
+    const result = document.getElementById("result");
+
+    result.textContent = Math.random();
+
+}
+<\/script>
+</body>
+</html>`;
+const $=id=>document.getElementById(id),code=$("code"),preview=$("preview"),nums=$("nums"),saveStatus=$("saveStatus"),runStatus=$("runStatus"),consolePanel=$("consolePanel"),consoleText=$("consoleText"),toast=$("toast");
+let timer,blobUrl;
+function msg(t){toast.textContent=t;toast.classList.add("show");clearTimeout(msg.t);msg.t=setTimeout(()=>toast.classList.remove("show"),1700)}
+function lines(){const n=Math.max(1,code.value.split("\n").length);nums.textContent=Array.from({length:n},(_,i)=>i+1).join("\n");nums.scrollTop=code.scrollTop}
+function save(){try{localStorage.setItem(KEY,code.value);saveStatus.textContent="この端末に自動保存済み"}catch(e){saveStatus.textContent="自動保存できません"}}
+function schedule(){saveStatus.textContent="編集中…";clearTimeout(timer);timer=setTimeout(save,450)}
+function cleanText(t){let s=t.trim(),m=s.match(/^```(?:html)?\s*([\s\S]*?)\s*```$/i);if(m)s=m[1];let a=s.search(/<!DOCTYPE\s+html/i),b=s.search(/<html[\s>]/i),start=a>=0?a:b,ends=[...s.matchAll(/<\/html\s*>/ig)],end=ends.at(-1);if(start>=0&&end)s=s.slice(start,end.index+end[0].length);return s.trim()}
+function instrument(s){const monitor=`<script>(function(){const send=(k,a)=>{try{parent.postMessage({source:"html-preview",kind:k,text:a.map(v=>{try{return typeof v==="object"?JSON.stringify(v):String(v)}catch(e){return String(v)}}).join(" ")},"*")}catch(e){}};addEventListener("error",e=>send("error",["JavaScriptエラー:",e.message,"行",e.lineno]));addEventListener("unhandledrejection",e=>send("error",["Promiseエラー:",e.reason]));for(const k of["log","warn","error"]){const o=console[k];console[k]=function(...a){o.apply(console,a);send(k,a)}}})();<\/script>`;return /<\/body\s*>/i.test(s)?s.replace(/<\/body\s*>/i,monitor+"\n</body>"):s+monitor}
+function clearConsole(){consoleText.textContent="";consolePanel.classList.add("hidden")}
+function run(clean=false){let s=code.value;if(clean){const c=cleanText(s);if(c!==s){code.value=c;lines();save();msg("コードブロック記号や説明部分を除きました")}s=c}if(!s.trim()){preview.srcdoc="<p style='font-family:sans-serif;padding:20px'>左の窓にHTMLを入力してください。</p>";runStatus.textContent="コードが空です";return}clearConsole();runStatus.textContent="実行中…";preview.srcdoc=instrument(s);setTimeout(()=>runStatus.textContent="実行しました",100)}
+async function copy(){try{await navigator.clipboard.writeText(code.value)}catch(e){code.select();document.execCommand("copy")}msg("コードをコピーしました")}
+function filename(){const m=code.value.match(/<title>(.*?)<\/title>/is);return ((m?m[1].trim():"作品").replace(/[\\/:*?"<>|]/g,"_").slice(0,40)||"作品")+".html"}
+function download(){const u=URL.createObjectURL(new Blob([code.value],{type:"text/html;charset=utf-8"})),a=document.createElement("a");a.href=u;a.download=filename();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);msg("HTMLファイルを保存しました")}
+function reset(){if(!confirm("現在の編集内容を消して、初期教材に戻しますか？"))return;code.value=starter;lines();save();run();msg("初期教材に戻しました")}
+function clearAll(){if(!confirm("編集窓の内容をすべて消しますか？"))return;code.value="";lines();save();preview.srcdoc="";runStatus.textContent="未実行";clearConsole();code.focus()}
+function openTab(){if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl=URL.createObjectURL(new Blob([code.value],{type:"text/html;charset=utf-8"}));if(!window.open(blobUrl,"_blank"))msg("ポップアップがブロックされました")}
+code.addEventListener("input",()=>{lines();schedule()});code.addEventListener("scroll",()=>nums.scrollTop=code.scrollTop);code.addEventListener("keydown",e=>{if(e.key==="Tab"){e.preventDefault();const a=code.selectionStart,b=code.selectionEnd;code.value=code.value.slice(0,a)+"  "+code.value.slice(b);code.selectionStart=code.selectionEnd=a+2;lines();schedule()}if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();run()}});
+$("run").onclick=()=>run();$("runTop").onclick=()=>run();$("clean").onclick=()=>run(true);$("copy").onclick=copy;$("download").onclick=download;$("reset").onclick=reset;$("clear").onclick=clearAll;$("newTab").onclick=openTab;$("clearConsole").onclick=clearConsole;
+$("fileInput").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{code.value=String(r.result||"");lines();save();run();msg(f.name+" を読み込みました")};r.onerror=()=>msg("ファイルを読み込めませんでした");r.readAsText(f,"UTF-8");e.target.value=""};
+addEventListener("message",e=>{const d=e.data;if(!d||d.source!=="html-preview")return;consolePanel.classList.remove("hidden");const mark=d.kind==="error"?"?":d.kind==="warn"?"▲":"●";consoleText.textContent+=(consoleText.textContent?"\n":"")+mark+" "+d.text});
+addEventListener("beforeunload",save);
+try{const s=localStorage.getItem(KEY);code.value=s||starter;saveStatus.textContent=s?"前回の内容を復元しました":"初期教材を表示"}catch(e){code.value=starter}
+lines();run();
+</script>
+</body>
+</html>
